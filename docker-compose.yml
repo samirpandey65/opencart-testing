@@ -3,7 +3,7 @@ version: '3.8'
 services:
   web:
     build:
-      context: .
+      context: .                     # <-- Now using the correct context
       dockerfile: php/Dockerfile
     container_name: opencart-app
     ports:

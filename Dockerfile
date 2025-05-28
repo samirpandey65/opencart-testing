@@ -11,12 +11,18 @@ RUN apt-get update && apt-get install -y \
   && docker-php-ext-install -j$(nproc) gd zip mysqli \
   && apt-get clean
 
-COPY ../upload/ ${DIR_OPENCART}
-COPY ../supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY ../nginx/default.conf /etc/nginx/sites-available/default
+# Copy application code
+COPY upload/ ${DIR_OPENCART}
+COPY nginx/default.conf /etc/nginx/sites-available/default
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
+# Create and populate the storage folder (only if it exists)
 RUN mkdir -p ${DIR_STORAGE} \
-  && cp -r ${DIR_OPENCART}/system/storage/* ${DIR_STORAGE} \
+  && if [ -d "${DIR_OPENCART}/system/storage" ]; then \
+       cp -r ${DIR_OPENCART}/system/storage/* ${DIR_STORAGE} || echo "No files to copy"; \
+     else \
+       echo "Warning: system/storage not found"; \
+     fi \
   && chown -R www-data:www-data ${DIR_STORAGE} ${DIR_IMAGE}
 
 CMD ["/usr/bin/supervisord"]
