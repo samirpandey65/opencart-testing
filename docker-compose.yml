@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: php/Dockerfile
+    container_name: opencart-app
+    ports:
+      - "8080:80"
+    volumes:
+      - ./upload/:/var/www/html/opencart/
+      - ./nginx/default.conf:/etc/nginx/sites-available/default
+      - ./supervisord.conf:/etc/supervisor/conf.d/supervisord.conf
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:10.6
+    container_name: opencart-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: opencart
+      MYSQL_USER: opencartuser
+      MYSQL_PASSWORD: opencartpass
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
+
