@@ -1,29 +1,56 @@
-FROM php:8.2-fpm
+FROM php:8.2.11-fpm
 
 ENV DIR_OPENCART='/var/www/html/opencart/'
 ENV DIR_STORAGE='/storage/'
+ENV DIR_CACHE=${DIR_STORAGE}'cache/'
+ENV DIR_DOWNLOAD=${DIR_STORAGE}'download/'
+ENV DIR_LOGS=${DIR_STORAGE}'logs/'
+ENV DIR_SESSION=${DIR_STORAGE}'session/'
+ENV DIR_UPLOAD=${DIR_STORAGE}'upload/'
 ENV DIR_IMAGE=${DIR_OPENCART}'image/'
 
+# Install system dependencies, PHP extensions, and Nginx
 RUN apt-get update && apt-get install -y \
-  nginx unzip curl vim supervisor \
+  nginx unzip curl vim apt-utils supervisor \
   libfreetype6-dev libjpeg62-turbo-dev libpng-dev libzip-dev \
   && docker-php-ext-configure gd --with-freetype --with-jpeg \
   && docker-php-ext-install -j$(nproc) gd zip mysqli \
+  && docker-php-ext-enable gd zip mysqli \
   && apt-get clean
 
-# Copy application code
+# Create necessary directories
+RUN mkdir -p ${DIR_STORAGE} ${DIR_OPENCART}
+
+# Copy OpenCart upload folder (from local project)
 COPY upload/ ${DIR_OPENCART}
-COPY nginx/default.conf /etc/nginx/sites-available/default
+
+# Remove install folder if present
+#RUN rm -rf ${DIR_OPENCART}install
+
+# Move storage files
+#RUN cp -r ${DIR_OPENCART}/system/storage/* ${DIR_STORAGE}
+RUN cp -r ${DIR_OPENCART}/system/storage/* ${DIR_STORAGE}
+
+# Set permissions
+RUN chown -R www-data:www-data ${DIR_STORAGE} ${DIR_IMAGE} \
+  && chmod -R 555 ${DIR_OPENCART} \
+  && chmod -R 666 ${DIR_STORAGE} \
+  && chmod 755 ${DIR_LOGS} \
+  && chmod -R 644 ${DIR_LOGS}* \
+  && chmod -R 744 ${DIR_IMAGE} \
+  && chmod -R 755 ${DIR_CACHE} \
+  && chmod -R 666 ${DIR_DOWNLOAD} ${DIR_SESSION} ${DIR_UPLOAD}
+
+# Copy custom php.ini if needed
+# COPY php.ini /usr/local/etc/php/
+
+# Copy nginx and supervisord config
+COPY default.conf /etc/nginx/sites-available/default
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Create and populate the storage folder (only if it exists)
-RUN mkdir -p ${DIR_STORAGE} \
-  && if [ -d "${DIR_OPENCART}/system/storage" ]; then \
-       cp -r ${DIR_OPENCART}/system/storage/* ${DIR_STORAGE} || echo "No files to copy"; \
-     else \
-       echo "Warning: system/storage not found"; \
-     fi \
-  && chown -R www-data:www-data ${DIR_STORAGE} ${DIR_IMAGE}
+# Expose HTTP port
+EXPOSE 80
 
-CMD ["/usr/bin/supervisord"]
+# Start nginx + php-fpm together via supervisord
+CMD ["/usr/bin/supervisord", "-n"]
 
