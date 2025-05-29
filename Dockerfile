@@ -33,7 +33,7 @@ RUN cp -r ${DIR_OPENCART}/system/storage/* ${DIR_STORAGE}
 
 # Set permissions
 RUN chown -R www-data:www-data ${DIR_STORAGE} ${DIR_IMAGE} \
-  && chmod -R 555 ${DIR_OPENCART} \
+  && chmod -R 777 ${DIR_OPENCART} \
   && chmod -R 666 ${DIR_STORAGE} \
   && chmod 755 ${DIR_LOGS} \
   && chmod -R 644 ${DIR_LOGS}* \
@@ -47,6 +47,7 @@ RUN chown -R www-data:www-data ${DIR_STORAGE} ${DIR_IMAGE} \
 # Copy nginx and supervisord config
 COPY default.conf /etc/nginx/sites-available/default
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
 
 # Expose HTTP port
 EXPOSE 80

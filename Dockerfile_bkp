@@ -25,9 +25,10 @@ RUN mkdir -p ${DIR_STORAGE} ${DIR_OPENCART}
 COPY upload/ ${DIR_OPENCART}
 
 # Remove install folder if present
-RUN rm -rf ${DIR_OPENCART}install
+#RUN rm -rf ${DIR_OPENCART}install
 
 # Move storage files
+#RUN cp -r ${DIR_OPENCART}/system/storage/* ${DIR_STORAGE}
 RUN cp -r ${DIR_OPENCART}/system/storage/* ${DIR_STORAGE}
 
 # Set permissions
