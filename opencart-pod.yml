@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: opencart-pod
+spec:
+  containers:
+  - name: opencart-pod
+    image: samirpandey65/opencart-nginx-working:latest
+    env:
+      - name: MYSQL_HOST
+        value: "mysql"          # Using service name instead of IP
+      - name: MYSQL_PASSWORD
+        value: "admin"
+      - name: MYSQL_USER
+        value: "root"
+      - name: MYSQL_DB
+        value: "mydb"
+    ports:
+      - containerPort: 5000
+    imagePullPolicy: Always

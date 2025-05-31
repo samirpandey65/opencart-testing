@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: opencart-service
+spec:
+  selector:
+    app: opencart-pod
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+      nodePort: 30004
+  type: NodePort

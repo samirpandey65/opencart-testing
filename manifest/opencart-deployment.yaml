@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opencart
+  namespace: opencart
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: opencart
+  template:
+    metadata:
+      labels:
+        app: opencart
+    spec:
+      containers:
+      - name: opencart
+        image: samirpandey65/opencart-nginx-working:latest
+        ports:
+        - containerPort: 80
+        env:
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: opencart-config
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: opencart-config
+              key: DB_PORT
+        - name: DB_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: opencart-config
+              key: MYSQL_DATABASE
+        - name: DB_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              name: opencart-config
+              key: MYSQL_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: opencart-secret
+              key: MYSQL_PASSWORD
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "200m"
+            memory: "256Mi"

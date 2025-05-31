@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opencart-pod
+  labels:
+    app: opencart-pod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: opencart-pod
+  template:
+    metadata:
+      labels:
+        app: opencart-pod
+    spec:
+      containers:
+        - name: opencart-pod
+          image: bitnami/opencart:latest
+          env:
+            - name: OPENCART_HOST
+              value: "opencart.example.com"
+            - name: OPENCART_DATABASE_HOST
+              value: "mysql"
+            - name: OPENCART_DATABASE_PORT_NUMBER
+              value: "3306"
+            - name: OPENCART_DATABASE_USER
+              value: "root"
+            - name: OPENCART_DATABASE_PASSWORD
+              value: "admin"
+            - name: OPENCART_DATABASE_NAME
+              value: "mydb"
+            - name: ALLOW_EMPTY_PASSWORD
+              value: "yes"
+          ports:
+            - containerPort: 8080
+            - containerPort: 8443
+          imagePullPolicy: Always

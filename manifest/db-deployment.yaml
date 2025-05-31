@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opencart-db
+  namespace: opencart
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: opencart-db
+  template:
+    metadata:
+      labels:
+        app: opencart-db
+    spec:
+      containers:
+      - name: mariadb
+        image: mariadb:10.6
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: opencart-secret
+              key: MYSQL_ROOT_PASSWORD
+        - name: MYSQL_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: opencart-config
+              key: MYSQL_DATABASE
+        - name: MYSQL_USER
+          valueFrom:
+            configMapKeyRef:
+              name: opencart-config
+              key: MYSQL_USER
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: opencart-secret
+              key: MYSQL_PASSWORD
+        volumeMounts:
+        - name: db-data
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: db-data
+        persistentVolumeClaim:
+          claimName: opencart-db-pvc

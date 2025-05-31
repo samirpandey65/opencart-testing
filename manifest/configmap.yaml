@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: opencart-config
+  namespace: opencart
+data:
+  MYSQL_DATABASE: opencart
+  MYSQL_USER: opencartuser
+  DB_HOST: opencart-db
+  DB_PORT: "3306"
